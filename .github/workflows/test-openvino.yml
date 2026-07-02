@@ -43,6 +43,7 @@ jobs:
         run: node dist/cli/cli.js pull hf:Qwen/Qwen2.5-0.5B-Instruct-GGUF/qwen2.5-0.5b-instruct-q4_k_m.gguf
         
       - name: Test OpenVINO Inference
+        shell: bash
         run: |
           cat << 'EOF' > test-openvino.js
           import { Llama, LlamaChatSession } from "./dist/index.js";
