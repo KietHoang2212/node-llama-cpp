@@ -43,4 +43,46 @@ jobs:
         run: node dist/cli/cli.js pull hf:Qwen/Qwen2.5-0.5B-Instruct-GGUF/qwen2.5-0.5b-instruct-q4_k_m.gguf
         
       - name: Test OpenVINO Inference
-        run: node dist/cli/cli.js chat --model hf:Qwen/Qwen2.5-0.5B-Instruct-GGUF/qwen2.5-0.5b-instruct-q4_k_m.gguf --gpu openvino --system-prompt "You are a helpful test bot. Please output SUCCESS." -m "Say SUCCESS"
+        run: |
+          cat << 'EOF' > test-openvino.js
+          import { Llama, LlamaChatSession } from "./dist/index.js";
+          import { createRequire } from "module";
+          import fs from "fs/promises";
+          import path from "path";
+          
+          const require = createRequire(import.meta.url);
+          
+          async function main() {
+              const isWin = process.platform === "win32";
+              const binFolder = isWin ? "win-x64-openvino" : "linux-x64-openvino";
+              const bindingPath = path.join(process.cwd(), "bins", binFolder, "llama-addon.node");
+              const buildMetadataPath = path.join(process.cwd(), "bins", binFolder, "_nlcBuildMetadata.json");
+              
+              console.log("Loading binding from:", bindingPath);
+              const binding = require(bindingPath);
+              const buildMetadata = JSON.parse(await fs.readFile(buildMetadataPath, "utf8"));
+              
+              const llama = await Llama._create({
+                  bindings: binding,
+                  bindingPath: bindingPath,
+                  buildType: "prebuilt",
+                  buildMetadata: buildMetadata,
+                  logger: Llama.defaultConsoleLogger,
+                  debug: true
+              });
+          
+              const model = await llama.loadModel({
+                  modelPath: "hf:Qwen/Qwen2.5-0.5B-Instruct-GGUF/qwen2.5-0.5b-instruct-q4_k_m.gguf"
+              });
+              
+              const context = await model.createContext();
+              const session = new LlamaChatSession({ contextSequence: context.getSequence() });
+              
+              console.log("Prompting...");
+              const res = await session.prompt("You are a helpful test bot. Say SUCCESS.", { maxTokens: 20 });
+              console.log("Response:", res);
+              if (!res.includes("SUCCESS")) process.exit(1);
+          }
+          main().catch(e => { console.error(e); process.exit(1); });
+          EOF
+          node test-openvino.js
