@@ -140,11 +140,24 @@ export class Llama {
             const backendsPath = path.dirname(bindingPath);
             const fallbackBackendsDir = path.join(extBackendsPath ?? backendsPath, "fallback");
 
-            bindings.loadBackends(backendsPath);
+            const originalPath = process.env.PATH;
+            if (process.platform === "win32") {
+                const pathKey = Object.keys(process.env).find(k => k.toLowerCase() === 'path') || 'PATH';
+                process.env[pathKey] = `${backendsPath};${process.env[pathKey] || ""}`;
+            }
 
-            loadedGpu = bindings.getGpuType();
-            if (loadedGpu == null || (loadedGpu === false && buildGpu !== false))
-                bindings.loadBackends(fallbackBackendsDir);
+            try {
+                bindings.loadBackends(backendsPath);
+
+                loadedGpu = bindings.getGpuType();
+                if (loadedGpu == null || (loadedGpu === false && buildGpu !== false))
+                    bindings.loadBackends(fallbackBackendsDir);
+            } finally {
+                if (process.platform === "win32") {
+                    const pathKey = Object.keys(process.env).find(k => k.toLowerCase() === 'path') || 'PATH';
+                    process.env[pathKey] = originalPath;
+                }
+            }
         }
 
         bindings.ensureGpuDeviceIsSupported();

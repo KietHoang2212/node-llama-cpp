@@ -455,6 +455,7 @@ jobs:
           
           if (process.env.ARTIFACT_NAME === "linux-1" && process.env.OPENVINO_DIR) {
             const openVinoLibDir = path.join(process.env.OPENVINO_DIR, "lib", "intel64");
+            const openVinoTbbDir = path.join(process.env.OPENVINO_DIR, "3rdparty", "tbb", "lib");
             const dest = path.join(llamaBinsDirectoryPath, "linux-x64-openvino");
             if (await fs.pathExists(dest)) {
               for (const file of await fs.readdir(openVinoLibDir)) {
@@ -462,14 +463,29 @@ jobs:
                   await fs.copy(path.join(openVinoLibDir, file), path.join(dest, file));
                 }
               }
+              if (await fs.pathExists(openVinoTbbDir)) {
+                for (const file of await fs.readdir(openVinoTbbDir)) {
+                  if (file.includes("libtbb") && file.includes(".so")) {
+                    await fs.copy(path.join(openVinoTbbDir, file), path.join(dest, file));
+                  }
+                }
+              }
             }
           } else if (process.env.ARTIFACT_NAME === "win-3" && process.env.OPENVINO_DIR) {
             const openVinoBinDir = path.join(process.env.OPENVINO_DIR, "bin", "intel64", "Release");
+            const openVinoTbbDir = path.join(process.env.OPENVINO_DIR, "3rdparty", "tbb", "bin");
             const dest = path.join(llamaBinsDirectoryPath, "win-x64-openvino");
             if (await fs.pathExists(dest)) {
               for (const file of await fs.readdir(openVinoBinDir)) {
                 if ((file.includes("openvino") && file.endsWith(".dll")) || file.endsWith(".xml")) {
                   await fs.copy(path.join(openVinoBinDir, file), path.join(dest, file));
+                }
+              }
+              if (await fs.pathExists(openVinoTbbDir)) {
+                for (const file of await fs.readdir(openVinoTbbDir)) {
+                  if (file.includes("tbb") && file.endsWith(".dll")) {
+                    await fs.copy(path.join(openVinoTbbDir, file), path.join(dest, file));
+                  }
                 }
               }
             }
