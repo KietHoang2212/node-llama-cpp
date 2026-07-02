@@ -69,13 +69,15 @@ jobs:
                   buildType: "prebuilt",
                   buildMetadata: buildMetadata,
                   logger: Llama.defaultConsoleLogger,
+                  vramPadding: 0,
+                  ramPadding: 0,
                   debug: true
               });
           
               const modelPath = path.join(process.cwd(), "models", "qwen.gguf");
               const model = await llama.loadModel({ modelPath });
               
-              const context = await model.createContext();
+              const context = await model.createContext({ contextSize: 1024 });
               const session = new LlamaChatSession({ contextSequence: context.getSequence() });
               
               console.log("Prompting...");
