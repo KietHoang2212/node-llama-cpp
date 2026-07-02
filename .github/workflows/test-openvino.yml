@@ -40,7 +40,7 @@ jobs:
           echo "LD_LIBRARY_PATH=$dir:$LD_LIBRARY_PATH" >> $GITHUB_ENV
           
       - name: Download Model
-        run: node dist/cli/cli.js download --model hf:ggerganov/qwen2-0.5b-instruct-gguf
+        run: node dist/cli/cli.js pull hf:ggerganov/qwen2-0.5b-instruct-gguf
         
       - name: Test OpenVINO Inference
         run: node dist/cli/cli.js chat --model hf:ggerganov/qwen2-0.5b-instruct-gguf --gpu openvino --system-prompt "You are a helpful test bot. Please output SUCCESS." -m "Say SUCCESS"
