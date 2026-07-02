@@ -161,6 +161,15 @@ New package stub for Windows x64 OpenVINO prebuilt binaries. Structure mirrors `
 
 **Deploy-pages** — added `continue-on-error: true` to prevent CI failures on forks without GitHub Pages enabled.
 
+#### [.github/workflows/test-openvino.yml](file:///Users/macbook/Documents/research/inference-engine/node-llama-cpp/.github/workflows/test-openvino.yml)
+
+**New standalone test workflow** added to verify OpenVINO binaries without recompiling.
+It runs on both `ubuntu-latest` and `windows-latest` (on CPU fallback, since runners lack Intel GPUs) and does the following:
+1. Uses `gh run download` to download the `bins-win-3` and `bins-linux-1` binary artifacts from the latest successful build.
+2. Extracts them and sets the necessary `OPENVINO_DIR` and `LD_LIBRARY_PATH` variables.
+3. Downloads a tiny `0.5B` GGUF model via the built-in CLI (`node dist/cli/cli.js download`).
+4. Tests runtime execution by forcing the OpenVINO backend (`--gpu openvino`) using the `chat` command.
+
 ---
 
 ## Feature 2: Q2_0 (1.58-bit Ternary) Support
