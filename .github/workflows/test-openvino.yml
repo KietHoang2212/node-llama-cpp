@@ -75,7 +75,7 @@ jobs:
               });
           
               const modelPath = path.join(process.cwd(), "models", "qwen.gguf");
-              const model = await llama.loadModel({ modelPath, gpuLayers: "max" });
+              const model = await llama.loadModel({ modelPath, gpuLayers: "max", ignoreMemorySafetyChecks: true });
               
               const context = await model.createContext({ contextSize: 1024 });
               const session = new LlamaChatSession({ contextSequence: context.getSequence() });
