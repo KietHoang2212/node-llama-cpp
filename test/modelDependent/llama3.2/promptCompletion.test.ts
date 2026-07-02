@@ -99,7 +99,7 @@ describe("llama 3.2", () => {
                 new SpecialTokensText("<|end_header_id|>"),
                 "
 
-              Hello! It's nice to meet you. Is there something I can help you with today?",
+              Hello! It's nice to meet you. Is there something I can help you with, or would you like to chat for a bit?",
               ])
             `);
 
