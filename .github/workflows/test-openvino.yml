@@ -27,17 +27,27 @@ jobs:
       
       - name: Setup OpenVINO Windows
         if: startsWith(matrix.os, 'windows')
+        shell: pwsh
         run: |
-          $dir = "$pwd\bins\win-x64-openvino"
-          echo "OPENVINO_DIR=$dir" >> $env:GITHUB_ENV
-          echo "$dir" >> $env:GITHUB_PATH
+          Invoke-WebRequest -Uri "https://storage.openvinotoolkit.org/repositories/openvino/packages/2026.2.1/windows/openvino_toolkit_windows_2026.2.1.21919.ede283a88e3_x86_64.zip" -OutFile "openvino.zip"
+          Expand-Archive -Path openvino.zip -DestinationPath . -Force
+          Remove-Item openvino.zip
+          $openvinoDir = "$pwd\openvino_toolkit_windows_2026.2.1.21919.ede283a88e3_x86_64\runtime"
+          $binDir = "$pwd\bins\win-x64-openvino"
+          echo "$openvinoDir\bin\intel64\Release" >> $env:GITHUB_PATH
+          echo "$openvinoDir\3rdparty\tbb\bin" >> $env:GITHUB_PATH
+          echo "$binDir" >> $env:GITHUB_PATH
       
       - name: Setup OpenVINO Linux
         if: startsWith(matrix.os, 'ubuntu')
         run: |
-          dir="$(pwd)/bins/linux-x64-openvino"
-          echo "OPENVINO_DIR=$dir" >> $GITHUB_ENV
-          echo "LD_LIBRARY_PATH=$dir:$LD_LIBRARY_PATH" >> $GITHUB_ENV
+          sudo apt-get update
+          sudo apt-get install -y intel-opencl-icd ocl-icd-libopencl1 opencl-headers opencl-clhpp-headers ocl-icd-opencl-dev libtbb12 || true
+          curl -L https://storage.openvinotoolkit.org/repositories/openvino/packages/2026.2.1/linux/openvino_toolkit_ubuntu22_2026.2.1.21919.ede283a88e3_x86_64.tgz --output openvino.tgz
+          tar -xf openvino.tgz
+          openvinoDir="$(pwd)/openvino_toolkit_ubuntu22_2026.2.1.21919.ede283a88e3_x86_64/runtime"
+          binDir="$(pwd)/bins/linux-x64-openvino"
+          echo "LD_LIBRARY_PATH=$openvinoDir/lib/intel64:$openvinoDir/3rdparty/tbb/lib:$binDir:$LD_LIBRARY_PATH" >> $GITHUB_ENV
           
       - name: Download Model
         run: node dist/cli/cli.js pull hf:Qwen/Qwen2.5-0.5B-Instruct-GGUF/qwen2.5-0.5b-instruct-q4_k_m.gguf --dir ./models --name qwen.gguf
