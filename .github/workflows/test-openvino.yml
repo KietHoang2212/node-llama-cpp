@@ -40,7 +40,7 @@ jobs:
           echo "LD_LIBRARY_PATH=$dir:$LD_LIBRARY_PATH" >> $GITHUB_ENV
           
       - name: Download Model
-        run: node dist/cli/cli.js pull hf:Qwen/Qwen2.5-0.5B-Instruct-GGUF/qwen2.5-0.5b-instruct-q4_k_m.gguf --dir ./models
+        run: node dist/cli/cli.js pull hf:Qwen/Qwen2.5-0.5B-Instruct-GGUF/qwen2.5-0.5b-instruct-q4_k_m.gguf --dir ./models --name qwen.gguf
         
       - name: Test OpenVINO Inference
         shell: bash
@@ -72,7 +72,7 @@ jobs:
                   debug: true
               });
           
-              const modelPath = path.join(process.cwd(), "models", "qwen2.5-0.5b-instruct-q4_k_m.gguf");
+              const modelPath = path.join(process.cwd(), "models", "qwen.gguf");
               const model = await llama.loadModel({ modelPath });
               
               const context = await model.createContext();
