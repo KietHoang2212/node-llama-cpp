@@ -42,6 +42,12 @@ const patches: RepoPatch[] = [{
 
         return false;
     }
+}, {
+    filename: "Q2_0-minimal.diff",
+    title: "feat: add BitNet Q2_0 ternary quantization support",
+    async canSkip() {
+        return false; // Always apply this custom patch unless manually disabled
+    }
 }];
 
 export function hasLlamaCppRepoPatchesToApply() {
